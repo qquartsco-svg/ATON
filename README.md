@@ -296,11 +296,10 @@ KEMET Engine (10부처 결합 ODE)
 70_TRIBES_LAYER (12지파 독립 엔진)
 _EDEN_LAYER (Shannon 엔트로피 + 가역적 이벤트 소싱)
         ↓
-_ATON_LAYER v1.0.0
+_ATON_LAYER v2.0.0
 인터페이스 계약 + 브릿지 + Nexus 오케스트레이터
+(KEMET 실제 연결 + 12지파 TribeCouncil 실제 연결)
 ```
-
----
 
 ---
 
