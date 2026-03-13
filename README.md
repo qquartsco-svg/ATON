@@ -4,6 +4,12 @@
 > 파라오 아크나톤이 "모든 에너지는 하나의 원천으로 귀결된다"고 선포한 혁명.
 >
 > → 모든 ENGINE_HUB 레이어를 하나의 동역학 흐름으로 통합한다.
+>
+> **현재 상태**: v2.0.0 ✅ — KEMET + 12지파 실제 엔진 연결 완성, 141 테스트 통과
+>
+> **레이어 이름 `_ATON`**: `_` prefix = ENGINE_HUB 내 **수평 통합 레이어** 네이밍 컨벤션.
+> 숫자 prefix(00~70)는 전문화 독립 엔진, 언더스코어(`_`)는 레이어 간 통합을 담당하는
+> 거버넌스 레이어(`_ATON`, `_PROMETHEUS`, `_EDEN`)를 의미한다.
 
 ---
 
@@ -184,13 +190,15 @@ _EDEN_LAYER (4대강 최종 집약)
 ## Tier 확장 구조
 
 ```
-TribesSignal 슬롯:
-  Tier 1 (완성):   levi(02), dan(04), asher(07), zebulun(09) — 4개
-  Tier 2 (예정):   reuben(01), simeon(03), issachar(05), gad(06) — 4개
-  Tier 3 (예정):   naphtali(08), joseph(10), benjamin(11), judah(12) — 4개
+TribesSignal v2.0 슬롯 (12지파 전체 완성 ✅):
+  Tier 1 (완성):  levi(02), dan(04), asher(07), zebulun(09)     — 4개
+  Tier 2 (완성):  reuben(01), simeon(03), issachar(06)          — 3개
+  Tier 3 (완성):  gad(05), judah(08), naphtali(10),
+                  joseph(11), benjamin(12)                       — 5개
 
-None인 슬롯 → 시스템은 기본값으로 정상 동작
-새 엔진 추가 → tribes_io.py에 슬롯만 채우면 됨
+TribesEngineAdapter → TribeCouncil 실제 연결 (v2.0)
+None인 슬롯 → 시스템은 기본값으로 정상 동작 (하위 호환)
+새 엔진 추가 → tribes_io.py에 슬롯만 채우면 됨 (플러그인 구조 유지)
 ```
 
 ---
@@ -212,18 +220,35 @@ python _ATON_LAYER/run_aton.py --scenario shock --report
 # Nexus 정합성 궤적
 python _ATON_LAYER/run_aton.py --coherence
 
-# 테스트
-python -m pytest _ATON_LAYER/tests/test_aton.py -v   # 69/69 ✅
+# 테스트 전체 (141/141 ✅)
+python -m pytest _ATON_LAYER/tests/ -v
+
+# 테스트 분리 실행
+python -m pytest _ATON_LAYER/tests/test_aton.py    -v  # v1.0 기본 (69)
+python -m pytest _ATON_LAYER/tests/test_aton_v2.py -v  # v2.0 실제 연결 (72)
 ```
 
 ### Python API
 
 ```python
-from _ATON_LAYER import Nexus, NexusConfig
+from _ATON_LAYER import Nexus, NexusConfig, make_real_nexus
 
-# 기본 시뮬레이션
-nexus = Nexus()
+# ── stub 모드 (기본값, 테스트·프로토타이핑용) ──────────────────────
+nexus = Nexus()                      # 내부 어댑터 = 더미 함수
 history = nexus.simulate(years=50)
+
+# ── real 모드 (v2.0 실제 엔진 연결) ───────────────────────────────
+nexus = make_real_nexus()            # KemetEngineAdapter + TribesEngineAdapter 주입
+                                     # → 실제 _rk4_step ODE + TribeCouncil(12지파) 실행
+history = nexus.simulate(years=50)
+
+# real 모드 커스텀 파라미터
+from kemet_engine.kemet_core import KemetParams
+nexus = make_real_nexus(
+    kemet_params=KemetParams(population=5_000_000),
+    use_real_kemet=True,
+    use_real_tribes=True,
+)
 
 # 파라오 칙령 포함
 history = nexus.simulate(
@@ -234,7 +259,7 @@ history = nexus.simulate(
     }
 )
 
-# 최종 상태
+# 최종 상태 출력
 nexus.report(history[-1])
 print(f"Ω_nexus = {history[-1].nexus_coherence:.3f}")
 ```
@@ -277,5 +302,18 @@ _ATON_LAYER v1.0.0
 
 ---
 
-*v1.0.0 — ENGINE_HUB/_ATON_LAYER*
-*테스트: 69/69 ✅ | 인터페이스: 4개 | 브릿지: 3개 | Tier2/3 슬롯: 8개*
+---
+
+## 버전 정보
+
+| 버전 | 상태 | 내용 |
+|------|------|------|
+| v1.0.0 | ✅ 완료 | Nexus 오케스트레이터 + stub 어댑터 · 69 테스트 |
+| v2.0.0 | ✅ 완료 | KEMET ODE 실제 연결 + 12지파 TribeCouncil 실제 연결 · 141 테스트 |
+| v3.0.0 | 🔲 예정 | PROMETHEUS 실제 연결 + EDEN 실제 연결 |
+| v4.0.0 | 🔲 예정 | AI 파라오 연동 (자율 칙령 시스템) |
+
+---
+
+*v2.0.0 — ENGINE_HUB/_ATON_LAYER*
+*테스트: 141/141 ✅ | 인터페이스: 4개 | 브릿지: 3개 + KemetAdapter + TribesAdapter | 12지파 전체 연결*
