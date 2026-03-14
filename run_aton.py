@@ -86,7 +86,7 @@ def print_timeline(history, interval: int = 10):
     print(" ATON NEXUS — 시뮬레이션 결과")
     print("="*70)
     print(f"{'t':>5}  {'Ω':>6}  {'D':>5}  {'R':>5}  {'OWE':>5}  "
-          f"{'Ma'at':>6}  {'K':>6}  {'c':>5}  플래그")
+          f"{'Maat':>6}  {'K':>6}  {'c':>5}  플래그")
     print("-"*70)
 
     for state in history:
