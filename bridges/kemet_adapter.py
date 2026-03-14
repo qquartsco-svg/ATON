@@ -30,8 +30,8 @@ from typing import Any, Dict, Optional
 # ── 경로 주입: kemet_engine ──────────────────────────────────────
 _here  = os.path.dirname(os.path.abspath(__file__))       # bridges/
 _aton  = os.path.dirname(_here)                            # _ATON_LAYER/
-_hub   = os.path.dirname(_aton)                            # ENGINE_HUB/
-_kemet = os.path.join(_hub, "60_APPLIED_LAYER", "kemet_engine")
+_hub   = os.path.dirname(os.path.dirname(_aton))           # ENGINE_HUB/
+_kemet = os.path.join(_hub, "1_operational", "60_APPLIED_LAYER", "kemet_engine")
 
 for _p in [_kemet, _hub]:
     if _p not in sys.path:
@@ -158,12 +158,13 @@ class KemetEngineAdapter:
             health_index   = s.health_index,
         )
 
-        # 예산 배분 (부처별)
+        # 예산 배분 (부처별) — KemetParams v0.6.0 기준 11개 필드
+        # bw_treasury=0.00(수입원) 제외, bw_foreign 삭제(→ bw_infocomm으로 교체)
         total_w = (
-            p.bw_agriculture + p.bw_defense + p.bw_education + p.bw_maritime
-            + p.bw_construction + p.bw_foreign + p.bw_labor
-            + p.bw_health + p.bw_justice
-        )
+            p.bw_health + p.bw_education + p.bw_homeland + p.bw_justice
+            + p.bw_defense + p.bw_labor + p.bw_agriculture
+            + p.bw_maritime + p.bw_construction + p.bw_econplan + p.bw_infocomm
+        )  # 기본값 합계 = 1.00
         edu_budget = d["tax_revenue"] * p.bw_education / max(1e-9, total_w)
         jus_budget = d["tax_revenue"] * p.bw_justice   / max(1e-9, total_w)
 
