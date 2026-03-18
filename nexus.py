@@ -221,6 +221,7 @@ class Nexus:
         # 초기 상태
         self._tribes_state = TribesSignal()
         self._prev_owe     = 1.0   # 이전 스텝 OWE (충격 감지용)
+        self._planet_context: Optional[Dict] = None  # EdenOS→ATON 브릿지: 행성 컨텍스트 유지
 
     def step(self, t: float, dt: float, external: Optional[Dict] = None) -> NexusState:
         """
@@ -312,6 +313,10 @@ class Nexus:
         # 에너지부 상태는 참조가 아닌 스냅샷으로 저장
         from copy import copy
         nexus.energy_ministry = copy(self.energy_ministry.state)
+        # 행성 트윈 브릿지: external에서 planet_context 주입 시 유지
+        if "planet_context" in ext:
+            self._planet_context = ext["planet_context"]
+        nexus.planet_context = self._planet_context
         nexus.update_flags()
 
         return nexus

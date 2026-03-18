@@ -68,6 +68,9 @@ class NexusState:
     # ── 충격 이벤트 기록 ──────────────────────────────────────────
     shock_events: List[OilShockEvent] = field(default_factory=list)
 
+    # ── 행성 트윈 연동 (EdenOS → ATON 브릿지) ──────────────────────
+    planet_context: Optional[Dict[str, Any]] = None  # habitability, eden_candidate_score, environmental_risk 등
+
     # ── ATON 통합 지수 ────────────────────────────────────────────
     nexus_coherence:    float = 0.5    # 시스템 전체 정합성 [0,1]
     # Ω_nexus = f(Ma'at, EII, 사회안정, 식량안보, 법준수)
@@ -157,6 +160,11 @@ class NexusState:
         self.system_flags["eden_state"] = (
             e is not None and e.is_eden_state()
         )
+        # 행성 트윈에서 온 에덴 후보 점수로도 eden_state 보강 (브릿지 연동)
+        if self.planet_context and self.system_flags["eden_state"] is False:
+            eden_score = self.planet_context.get("eden_candidate_score")
+            if eden_score is not None and float(eden_score) >= 0.75:
+                self.system_flags["eden_state"] = True
 
         self.nexus_coherence = self.compute_coherence()
 
